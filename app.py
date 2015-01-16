@@ -11,6 +11,7 @@ about_page = uic.loadUiType("about_page.ui")[0]
 
 
 class MainWindow(QtGui.QMainWindow, main_page):
+	"""Defines the main window and various attributes/functions it holds"""
 
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -158,6 +159,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.about_window.show()
 
 class AddPage(QtGui.QDialog, add_page):
+	"""Window for whenever the user wishes to add something to the database"""
 
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -201,6 +203,7 @@ class AddPage(QtGui.QDialog, add_page):
 
 
 class ModifyPage(QtGui.QDialog, modify_page):
+	"""Window for whenever the user wishes to modify an existing entry"""
 
 	def __init__(self, url, user, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -247,6 +250,7 @@ class ModifyPage(QtGui.QDialog, modify_page):
 
 
 class DeletePage(QtGui.QDialog, delete_page):
+	"""Window for whenever the user wishes to delete an existing entry"""
 
 	def __init__(self, url, user, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -285,6 +289,7 @@ class DeletePage(QtGui.QDialog, delete_page):
 		self.close()
 
 class AboutPage(QtGui.QDialog, about_page):
+	"""The 'about' window"""
 
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
