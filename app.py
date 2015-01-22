@@ -38,6 +38,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.about_window = None
 
 	def show_passwords(self):
+		"""When activated, shows ALL passwords for all rows"""
 		row = 0
 
 		# Item set to two since passwords will always be in column two;
@@ -51,6 +52,8 @@ class MainWindow(QtGui.QMainWindow, main_page):
 			row += 1
 
 	def refresh(self):
+		"""Upon activation, will empty out any and all shown passwords and
+			also show any modifications done to the database"""
 		row = 0
 		item = 0
 		limit = session.query(Locker).count()
@@ -69,6 +72,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 				self.manager.insertRow(row)
 
 	def context_menu_for_manager(self, event):
+		"""creates the right click functionality for the table manager"""
 		self.menu = QtGui.QMenu(self)
 
 		# Modify Selection Creation
@@ -89,6 +93,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.menu.popup(QtGui.QCursor.pos())
 
 	def modify_selection(self):
+		"""modifies selected row"""
 		row = self.manager.currentRow()
 
 		# 0 and 1 are the respective columns for url and user
@@ -97,6 +102,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.open_modify_window(url, user)
 
 	def delete_selection(self):
+		"""deletes selected row"""
 		row = self.manager.currentRow()
 
 		# 0 and 1 are the respective columns for url and user
@@ -105,6 +111,8 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.open_delete_window(url, user)
 
 	def show_specific_password(self):
+		"""When selected through the right click menu,
+		provides the user the password for that row only"""
 		row = self.manager.currentRow()
 
 		# 0 and 1 are the respective columns for url and user
@@ -116,7 +124,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 
 
 	def clear(self, amount=0):
-		# Always sets the rowcount to zero first, otherwise first row acts weird
+		"""Always sets the rowcount to zero first, otherwise first row acts weird"""
 		self.manager.setRowCount(0)
 		self.manager.setRowCount(amount)
 
@@ -174,6 +182,7 @@ class AddPage(QtGui.QDialog, add_page):
 			return True
 
 	def add(self):
+		"""Adds a user to db"""
 		add_url = self.website_input.text()
 		add_user = self.account_input.text()
 		add_password = self.password_input.text()
@@ -195,7 +204,7 @@ class AddPage(QtGui.QDialog, add_page):
 			self.exit()
 
 	def exit(self):
-		#Run clear input prior to exiting ensure clean window
+		"""Run clear input prior to exiting ensure clean window"""
 		self.website_input.clear()
 		self.account_input.clear()
 		self.password_input.clear()
@@ -217,6 +226,7 @@ class ModifyPage(QtGui.QDialog, modify_page):
 		self.user = user
 
 	def modify(self):
+		"""Modifies selected row through right click menu"""
 		modify_url = str(self.website_input.text())
 		modify_user = str(self.account_input.text())
 		modify_password = str(self.password_input.text())
@@ -242,7 +252,7 @@ class ModifyPage(QtGui.QDialog, modify_page):
 			return True
 
 	def exit(self):
-		#Run clear input prior to exiting ensure clean window
+		"""Run clear input prior to exiting ensure clean window"""
 		self.website_input.clear()
 		self.account_input.clear()
 		self.password_input.clear()
@@ -277,12 +287,12 @@ class DeletePage(QtGui.QDialog, delete_page):
 		self.close()
 
 	def clear_input(self):
-		#Clears input text area
+		"""Clears input text area"""
 		self.url_delete_display.clear()
 		self.user_delete_display.clear()
 
 	def exit(self):
-		#Set displays to editable so when window reopens the displays are accurate
+		"""Set displays to editable so when window reopens the displays are accurate"""
 		self.clear_input()
 		self.url_delete_display.setReadOnly(False)
 		self.user_delete_display.setReadOnly(False)
