@@ -5,7 +5,7 @@ import time
 
 main_page = uic.loadUiType("password_main_page.ui")[0]
 add_page = uic.loadUiType("password_add_page.ui")[0]
-modify_page = uic.loadUiType("password_modify_page.ui")[0]
+password_modify_page = uic.loadUiType("password_modify_page.ui")[0]
 delete_page = uic.loadUiType("password_delete_page.ui")[0]
 about_page = uic.loadUiType("about_page.ui")[0]
 
@@ -36,9 +36,9 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.modify_window = None
 		self.delete_window = None
 		self.about_window = None
+		self.modify_password_window = None
 
 	def show_passwords(self):
-		"""When activated, shows ALL passwords for all rows"""
 		row = 0
 
 		# Item set to two since passwords will always be in column two;
@@ -52,8 +52,6 @@ class MainWindow(QtGui.QMainWindow, main_page):
 			row += 1
 
 	def refresh(self):
-		"""Upon activation, will empty out any and all shown passwords and
-			also show any modifications done to the database"""
 		row = 0
 		item = 0
 		limit = session.query(Locker).count()
@@ -72,13 +70,12 @@ class MainWindow(QtGui.QMainWindow, main_page):
 				self.manager.insertRow(row)
 
 	def context_menu_for_manager(self, event):
-		"""creates the right click functionality for the table manager"""
 		self.menu = QtGui.QMenu(self)
 
-		# Modify Selection Creation
-		action_modify = QtGui.QAction('Modify', self)
-		action_modify.triggered.connect(self.modify_selection)
-		self.menu.addAction(action_modify)
+		# Modify Password Selection
+		action_modify_password = QtGui.QAction('Change Password', self)
+		action_modify_password.triggered.connect(self.modify_password)
+		self.menu.addAction(action_modify_password)
 
 		# Delete Selection Creation
 		action_delete = QtGui.QAction('Delete', self)
@@ -92,17 +89,15 @@ class MainWindow(QtGui.QMainWindow, main_page):
 
 		self.menu.popup(QtGui.QCursor.pos())
 
-	def modify_selection(self):
-		"""modifies selected row"""
+	def modify_password(self):
 		row = self.manager.currentRow()
 
 		# 0 and 1 are the respective columns for url and user
-		url = self.manager.item(row, 0).text()
+		url = self.manager.item(row, 0). text()
 		user = self.manager.item(row, 1).text()
-		self.open_modify_window(url, user)
+		self.open_modify_password_window(url, user)
 
 	def delete_selection(self):
-		"""deletes selected row"""
 		row = self.manager.currentRow()
 
 		# 0 and 1 are the respective columns for url and user
@@ -111,8 +106,6 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.open_delete_window(url, user)
 
 	def show_specific_password(self):
-		"""When selected through the right click menu,
-		provides the user the password for that row only"""
 		row = self.manager.currentRow()
 
 		# 0 and 1 are the respective columns for url and user
@@ -122,9 +115,8 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		for instance in session.query(Locker).filter_by(url=url,user=user):
 			self.manager.setItem(row, 2, QtGui.QTableWidgetItem(instance.password))
 
-
 	def clear(self, amount=0):
-		"""Always sets the rowcount to zero first, otherwise first row acts weird"""
+		# Always sets the rowcount to zero first, otherwise first row acts weird
 		self.manager.setRowCount(0)
 		self.manager.setRowCount(amount)
 
@@ -136,17 +128,17 @@ class MainWindow(QtGui.QMainWindow, main_page):
 			self.add_window = AddPage()
 		self.add_window.show()
 
-	def open_modify_window(self, url, user):
+	def open_modify_password_window(self, url, user):
 		# If window has not been opened since start of application
-		if self.modify_window is None:
-			self.modify_window = ModifyPage(url, user)
+		if self.modify_password_window is None:
+			self.modify_password_window = ModifyPasswordPage(url, user)
 
-		# If it has been opened prior, zero's it out so it can actually work again.
-		elif self.modify_window:
-			self.modify_window = None
-			self.modify_window = ModifyPage(url, user)
+		# If it has been opened prior
+		else:
+			self.modify_password_window = None
+			self.modify_password_window = ModifyPasswordPage(url, user)
 
-		self.modify_window.show()
+		self.modify_password_window.show()	
 
 	def open_delete_window(self, url, user):
 		# If window has not been opened since start of application
@@ -154,7 +146,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 			self.delete_window = DeletePage(url, user)
 
 		# If it has been opened prior, zero's it out so it can actually work again.
-		elif self.delete_window:
+		else:
 			self.delete_window = None
 			self.delete_window = DeletePage(url, user)
 
@@ -182,7 +174,6 @@ class AddPage(QtGui.QDialog, add_page):
 			return True
 
 	def add(self):
-		"""Adds a user to db"""
 		add_url = self.website_input.text()
 		add_user = self.account_input.text()
 		add_password = self.password_input.text()
@@ -204,15 +195,14 @@ class AddPage(QtGui.QDialog, add_page):
 			self.exit()
 
 	def exit(self):
-		"""Run clear input prior to exiting ensure clean window"""
+		#Run clear input prior to exiting ensure clean window
 		self.website_input.clear()
 		self.account_input.clear()
 		self.password_input.clear()
 		self.close()
 
-
-class ModifyPage(QtGui.QDialog, modify_page):
-	"""Window for whenever the user wishes to modify an existing entry"""
+class ModifyPasswordPage(QtGui.QDialog, password_modify_page):
+	"""Window for when the user determines to modify their prior password"""
 
 	def __init__(self, url, user, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -225,39 +215,47 @@ class ModifyPage(QtGui.QDialog, modify_page):
 		self.url = url
 		self.user = user
 
+		# Set UserName and Password displays
+		self.url_display.setText(url)
+		self.url_display.setReadOnly(True)
+
+		self.user_display.setText(user)
+		self.user_display.setReadOnly(True)
+
+
+	def check_if_empty_string(self, url='null', user='null', password='null'):
+		if not url or not url.strip() or not user or not user.strip() or not password or not password.strip():
+			return True
+
+
 	def modify(self):
-		"""Modifies selected row through right click menu"""
-		modify_url = str(self.website_input.text())
-		modify_user = str(self.account_input.text())
+		modify_url = str(self.url_display.text())
+		modify_user = str(self.user_display.text())
 		modify_password = str(self.password_input.text())
 
 		if self.check_if_empty_string(modify_url, modify_user, modify_password):
 			QtGui.QMessageBox.warning(
-				self, "Invalid Entry", "Make sure you did not leave any field blank")
-		elif session.query(Locker).filter_by(url=modify_url, user=modify_user).count() >= 1:
-			QtGui.QMessageBox.warning(
-				self, "Invalid Entry", " URL:[{}] \n USER:[{}] \n Already exists!".format(modify_url, modify_user))
+				self, "Invalid Entry", "Make sure you input a password.")
 		else:
 			new = session.query(Locker).filter_by(url=self.url,user=self.user).one()
 			new.url = modify_url
 			new.user = modify_user
 			new.password = modify_password
 			session.commit()
-			QtGui.QMessageBox.information(self, "Completed", "Succesfully Updated \n URL:[{}] \n USER:[{}] \n PASSWORD:[{}]".format(
-				modify_url, modify_user, (len(modify_password) * '*')))
+			QtGui.QMessageBox.information(self, "Completed", "Succesfully Updated \n URL:[{}] \n USER:[{}] \n PASSWORD:[{}]".format(modify_url, modify_user, (len(modify_password) * '*')))
 			self.exit()
 
-	def check_if_empty_string(self, url='null', user='null', password='null'):
-		if not url or not url.strip() or not user or not user.strip() or not password or not password.strip():
-			return True
+	def clear_input(self):
+		#Clears input text area
+		self.url_display.clear()
+		self.user_display.clear()
 
 	def exit(self):
-		"""Run clear input prior to exiting ensure clean window"""
-		self.website_input.clear()
-		self.account_input.clear()
-		self.password_input.clear()
+		#Set displays to editable so when window reopens the displays are accurate
+		self.clear_input()
+		self.url_display.setReadOnly(False)
+		self.user_display.setReadOnly(False)
 		self.close()
-
 
 class DeletePage(QtGui.QDialog, delete_page):
 	"""Window for whenever the user wishes to delete an existing entry"""
@@ -287,12 +285,12 @@ class DeletePage(QtGui.QDialog, delete_page):
 		self.close()
 
 	def clear_input(self):
-		"""Clears input text area"""
+		#Clears input text area
 		self.url_delete_display.clear()
 		self.user_delete_display.clear()
 
 	def exit(self):
-		"""Set displays to editable so when window reopens the displays are accurate"""
+		#Set displays to editable so when window reopens the displays are accurate
 		self.clear_input()
 		self.url_delete_display.setReadOnly(False)
 		self.user_delete_display.setReadOnly(False)
