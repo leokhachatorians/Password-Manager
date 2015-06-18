@@ -8,7 +8,7 @@ delete_page = uic.loadUiType("password_delete_page.ui")[0]
 class DeletePage(QtGui.QDialog, delete_page):
 	"""Window for whenever the user wishes to delete an existing entry"""
 
-	def __init__(self, url, user, parent=None):
+	def __init__(self, url, user, account, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
 		self.setupUi(self)
 
@@ -18,6 +18,7 @@ class DeletePage(QtGui.QDialog, delete_page):
 
 		self.url = url
 		self.user = user
+		self.account = account
 
 		#Display URL and USER selections and set to readonly
 		self.url_delete_display.setText(url)
@@ -27,7 +28,7 @@ class DeletePage(QtGui.QDialog, delete_page):
 		self.user_delete_display.setReadOnly(True)
 
 	def delete(self):
-		session.query(Locker).filter_by(url=self.url,user=self.user).delete()
+		session.query(Locker).filter_by(url=self.url,user=self.user,account=self.account).delete()
 		session.commit()
 		QtGui.QMessageBox.information(self,"Deleted","Sucessfully Deleted \n URL:[{}] \n USER:[{}]".format(self.url,self.user))
 		self.close()

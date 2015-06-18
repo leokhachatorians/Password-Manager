@@ -11,9 +11,19 @@ main_page = uic.loadUiType("password_main_page.ui")[0]
 class MainWindow(QtGui.QMainWindow, main_page):
 	"""Defines the main window and various attributes/functions it holds"""
 
-	def __init__(self, parent=None):
+	def __init__(self, account, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
 		self.setupUi(self)
+		
+		# The account is the master account which holds that groups password stuff
+		self.account = account
+
+		# Default window states; not currently open
+		self.add_window = None
+		self.modify_window = None
+		self.delete_window = None
+		self.about_window = None
+		self.modify_password_window = None
 
 		# File menu actions
 		self.action_add_new.triggered.connect(self.open_add_window)
@@ -29,14 +39,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.manager.customContextMenuRequested.connect(
 			self.context_menu_for_manager)
 
-		# Default window states; not currently open
-		self.add_window = None
-		self.modify_window = None
-		self.delete_window = None
-		self.about_window = None
-		self.modify_password_window = None
-
-	def show_passwords(self):
+	def show_passwords(self, account):
 		row = 0
 
 		# Item set to two since passwords will always be in column two;
@@ -44,7 +47,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		# (url, user, PASSWORD)
 		item = 2
 
-		for instance in session.query(Locker):
+		for instance in session.query(Locker).filter_by(account):
 			self.manager.setItem(
 				row, item, QtGui.QTableWidgetItem(instance.password))
 			row += 1
@@ -52,9 +55,9 @@ class MainWindow(QtGui.QMainWindow, main_page):
 	def refresh(self):
 		row = 0
 		item = 0
-		limit = session.query(Locker).count()
+		limit = session.query(Locker).filter_by(account=self.account).count()
 		self.clear(1)
-		for instance in session.query(Locker):
+		for instance in session.query(Locker).filter_by(account=self.account):
 			self.manager.setItem(
 				row, item, QtGui.QTableWidgetItem(instance.url))
 			item += 1
@@ -93,7 +96,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		# 0 and 1 are the respective columns for url and user
 		url = self.manager.item(row, 0). text()
 		user = self.manager.item(row, 1).text()
-		self.open_modify_password_window(url, user)
+		self.open_modify_password_window(url, user, self.account)
 
 	def delete_selection(self):
 		row = self.manager.currentRow()
@@ -101,7 +104,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		# 0 and 1 are the respective columns for url and user
 		url = self.manager.item(row, 0).text()
 		user = self.manager.item(row, 1).text()
-		self.open_delete_window(url, user)
+		self.open_delete_window(url, user, self.account)
 
 	def show_specific_password(self):
 		row = self.manager.currentRow()
@@ -110,7 +113,7 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		url = self.manager.item(row, 0).text()
 		user = self.manager.item(row, 1).text()
 
-		for instance in session.query(Locker).filter_by(url=url,user=user):
+		for instance in session.query(Locker).filter_by(url=url,user=user,account=self.account):
 			self.manager.setItem(row, 2, QtGui.QTableWidgetItem(instance.password))
 
 	def clear(self, amount=0):
@@ -123,30 +126,30 @@ class MainWindow(QtGui.QMainWindow, main_page):
 
 	def open_add_window(self):
 		if self.add_window is None:
-			self.add_window = AddPage()
+			self.add_window = AddPage(self.account)
 		self.add_window.show()
 
-	def open_modify_password_window(self, url, user):
+	def open_modify_password_window(self, url, user, account):
 		# If window has not been opened since start of application
 		if self.modify_password_window is None:
-			self.modify_password_window = ModifyPasswordPage(url, user)
+			self.modify_password_window = ModifyPasswordPage(url, user, account)
 
 		# If it has been opened prior
 		else:
 			self.modify_password_window = None
-			self.modify_password_window = ModifyPasswordPage(url, user)
+			self.modify_password_window = ModifyPasswordPage(url, user, account)
 
 		self.modify_password_window.show()	
 
-	def open_delete_window(self, url, user):
+	def open_delete_window(self, url, user, account):
 		# If window has not been opened since start of application
 		if self.delete_window is None:
-			self.delete_window = DeletePage(url, user)
+			self.delete_window = DeletePage(url, user, account)
 
 		# If it has been opened prior, zero's it out so it can actually work again.
 		else:
 			self.delete_window = None
-			self.delete_window = DeletePage(url, user)
+			self.delete_window = DeletePage(url, user, account)
 
 		self.delete_window.show()
 

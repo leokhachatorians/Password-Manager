@@ -8,7 +8,7 @@ password_modify_page = uic.loadUiType("password_modify_page.ui")[0]
 class ModifyPasswordPage(QtGui.QDialog, password_modify_page):
 	"""Window for when the user determines to modify their prior password"""
 
-	def __init__(self, url, user, parent=None):
+	def __init__(self, url, user, account, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
 		self.setupUi(self)
 
@@ -18,6 +18,7 @@ class ModifyPasswordPage(QtGui.QDialog, password_modify_page):
 
 		self.url = url
 		self.user = user
+		self.account = account
 
 		# Set UserName and Password displays
 		self.url_display.setText(url)
@@ -41,7 +42,7 @@ class ModifyPasswordPage(QtGui.QDialog, password_modify_page):
 			QtGui.QMessageBox.warning(
 				self, "Invalid Entry", "Make sure you input a password.")
 		else:
-			new = session.query(Locker).filter_by(url=self.url,user=self.user).one()
+			new = session.query(Locker).filter_by(url=self.url,user=self.user,account=self.account).one()
 			new.url = modify_url
 			new.user = modify_user
 			new.password = modify_password
