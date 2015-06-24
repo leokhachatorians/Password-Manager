@@ -19,4 +19,14 @@ class Locker(Base):
 	def __repr__(self):
 		return "<Website(url={}, user={}, password={}, account={}>".format(url, user, password, account)
 
+class Accounts(Base):
+	__tablename__ = 'accounts'
+
+	id = Column(Integer, Sequence('account_id_seq'), primary_key=True)
+	account = Column(String(60))
+	password = Column(String(60))
+
+	def __repr__(self):
+		return "<Accounts(account={}, password={}>".format(account,password)
+
 Base.metadata.create_all(engine)

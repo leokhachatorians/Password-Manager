@@ -1,14 +1,15 @@
 from db_init import session, Locker
 import sys
 from PyQt4 import QtCore, QtGui, uic
-from add_page_class import AddPage
-from modify_password_class import ModifyPasswordPage
-from delete_page_class import DeletePage
-from about_page_class import AboutPage
+from classes.add_entry_class import AddEntry
+from classes.modify_password_class import ModifyPassword
+from classes.delete_entry_class import DeleteEntry
+from classes.about_class import AboutPage
+import classes.account_viewer_class #No idea why 'from classes.account_viewer_class import AccountViewer doesnt work'
 
-main_page = uic.loadUiType("password_main_page.ui")[0]
+main_page = uic.loadUiType("pages/password_main_page.ui")[0]
 
-class MainWindow(QtGui.QMainWindow, main_page):
+class EntryViewer(QtGui.QMainWindow, main_page):
 	"""Defines the main window and various attributes/functions it holds"""
 
 	def __init__(self, account, parent=None):
@@ -24,12 +25,13 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.delete_window = None
 		self.about_window = None
 		self.modify_password_window = None
+		self.account_viewer_window = None
 
 		# File menu actions
 		self.action_add_new.triggered.connect(self.open_add_window)
 		self.action_exit.triggered.connect(self.exit)
 		self.action_show_all.triggered.connect(self.show_passwords)
-		self.action_about.triggered.connect(self.open_about_window)
+		self.action_switch_user.triggered.connect(self.switch_user)
 
 		# Button actions
 		self.add_button.clicked.connect(self.open_add_window)
@@ -39,15 +41,26 @@ class MainWindow(QtGui.QMainWindow, main_page):
 		self.manager.customContextMenuRequested.connect(
 			self.context_menu_for_manager)
 
-	def show_passwords(self, account):
+		# Double Click Setup
+		self.manager.doubleClicked.connect(self.show_specific_password)
+
+	def switch_user(self):
+		if self.account_viewer_window is None:
+			self.account_viewer_window = classes.account_viewer_class.AccountViewer()
+
+		self.account_viewer_window.populate_manager()
+		self.account_viewer_window.show()
+		self.close()
+
+	def show_passwords(self):
 		row = 0
+		account = self.account
 
 		# Item set to two since passwords will always be in column two;
 		# (0,     1,      2)
 		# (url, user, PASSWORD)
 		item = 2
-
-		for instance in session.query(Locker).filter_by(account):
+		for instance in session.query(Locker).filter_by(account=self.account):
 			self.manager.setItem(
 				row, item, QtGui.QTableWidgetItem(instance.password))
 			row += 1
@@ -126,35 +139,32 @@ class MainWindow(QtGui.QMainWindow, main_page):
 
 	def open_add_window(self):
 		if self.add_window is None:
-			self.add_window = AddPage(self.account)
+			self.add_window = AddEntry(self.account)
 		self.add_window.show()
+		self.close()
 
 	def open_modify_password_window(self, url, user, account):
 		# If window has not been opened since start of application
 		if self.modify_password_window is None:
-			self.modify_password_window = ModifyPasswordPage(url, user, account)
+			self.modify_password_window = ModifyPassword(url, user, account)
 
 		# If it has been opened prior
 		else:
 			self.modify_password_window = None
-			self.modify_password_window = ModifyPasswordPage(url, user, account)
+			self.modify_password_window = ModifyPassword(url, user, account)
 
-		self.modify_password_window.show()	
+		self.modify_password_window.show()
+		self.close()	
 
 	def open_delete_window(self, url, user, account):
 		# If window has not been opened since start of application
 		if self.delete_window is None:
-			self.delete_window = DeletePage(url, user, account)
+			self.delete_window = DeleteEntry(url, user, account)
 
 		# If it has been opened prior, zero's it out so it can actually work again.
 		else:
 			self.delete_window = None
-			self.delete_window = DeletePage(url, user, account)
+			self.delete_window = DeleteEntry(url, user, account)
 
 		self.delete_window.show()
-
-	def open_about_window(self):
-		if self.about_window is None:
-			self.about_window = AboutPage()
-
-		self.about_window.show()
+		self.close()

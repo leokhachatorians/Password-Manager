@@ -1,10 +1,10 @@
-from main_page_class import MainWindow
+from classes.account_viewer_class import AccountViewer
 from PyQt4 import QtGui
 import sys
 
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
-	gui = MainWindow()
+	gui = AccountViewer()
 	gui.show()
-	gui.refresh()
+	gui.populate_manager()
 	app.exec_()

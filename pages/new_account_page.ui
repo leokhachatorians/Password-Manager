@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>New Account</string>
+   <string>Create Account</string>
   </property>
   <widget class="QPushButton" name="exit_button">
    <property name="geometry">

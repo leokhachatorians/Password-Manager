@@ -64,7 +64,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="account_verify_input">
+  <widget class="QLineEdit" name="password_verify_input">
    <property name="geometry">
     <rect>
      <x>100</x>
@@ -79,12 +79,12 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>81</width>
+     <width>91</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Enter Account</string>
+    <string>Enter Password</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -97,7 +97,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Name to Delete</string>
+    <string>To Delete</string>
    </property>
   </widget>
  </widget>

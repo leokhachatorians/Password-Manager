@@ -1,11 +1,11 @@
 from db_init import session, Locker
 import sys
 from PyQt4 import QtCore, QtGui, uic
+import classes.entry_viewer_class
 
+add_page = uic.loadUiType("pages/password_add_page.ui")[0]
 
-add_page = uic.loadUiType("password_add_page.ui")[0]
-
-class AddPage(QtGui.QDialog, add_page):
+class AddEntry(QtGui.QDialog, add_page):
 	"""Window for whenever the user wishes to add something to the database"""
 
 	def __init__(self, account, parent=None):
@@ -18,6 +18,9 @@ class AddPage(QtGui.QDialog, add_page):
 
 		# Account holder
 		self.account = account
+
+		# Window state for entry viewer
+		self.entry_viewer_window = None
 
 	def check_if_empty_string(self, url='null', user='null', password='null'):
 		if not url or not url.strip() or not user or not user.strip() or not password or not password.strip():
@@ -50,4 +53,11 @@ class AddPage(QtGui.QDialog, add_page):
 		self.website_input.clear()
 		self.account_input.clear()
 		self.password_input.clear()
+		self.reload_viewer()
 		self.close()
+
+	def reload_viewer(self):
+		if self.entry_viewer_window is None:
+			self.entry_viewer_window = classes.entry_viewer_class.EntryViewer(self.account)
+		self.entry_viewer_window.refresh()
+		self.entry_viewer_window.show()

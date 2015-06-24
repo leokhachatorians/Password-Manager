@@ -1,13 +1,13 @@
-from account_db_init import Accounts
-from account_db_init import session as acnt_session
+from db_init import Accounts, session
 import sys
 from PyQt4 import QtCore, QtGui, uic
-from main_page_class import MainWindow
-from new_account_class import NewAccount
-from account_login_class import AccountLogin
-from delete_account_class import DeleteAccount
+from classes.entry_viewer_class import EntryViewer
+from classes.new_account_class import NewAccount
+from classes.account_login_class import AccountLogin
+from classes.delete_account_class import DeleteAccount
+from classes.about_class import AboutPage
 
-account_viewer_page = uic.loadUiType("account_viewer_page.ui")[0]
+account_viewer_page = uic.loadUiType("pages/account_viewer_page.ui")[0]
 
 class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 	def __init__(self, parent=None):
@@ -15,17 +15,23 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		self.setupUi(self)
 
 		# Default window states; not currently open
-		self.main_window = None
+		self.entry_viewer = None
 		self.new_account_window = None
 		self.account_login_window = None
 		self.delete_account_window = None
+		self.about_window = None
 
-		# Button Actions
-		self.new_account_button.clicked.connect(self.open_new_account_window)
+		# File Menu Actiosn
+		self.action_new_account.triggered.connect(self.open_new_account_window)
+		self.action_exit.triggered.connect(self.close)
+		self.action_about.triggered.connect(self.open_about_window)
 
 		# Set the context menu for the account viewer
 		self.manager.customContextMenuRequested.connect(
 			self.context_menu_for_manager)
+
+		# Double click setup
+		self.manager.doubleClicked.connect(self.login_selection)
 
 	def context_menu_for_manager(self, event):
 		self.menu = QtGui.QMenu(self)
@@ -45,10 +51,10 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 	def populate_manager(self):
 		row = 0
 		item = 0
-		limit = acnt_session.query(Accounts).count()
+		limit = session.query(Accounts).count()
 		self.set_manager_count(1)
 
-		for instance in acnt_session.query(Accounts):
+		for instance in session.query(Accounts):
 			self.manager.setItem(row, item, QtGui.QTableWidgetItem(instance.account))
 
 			# Do this to prevent an additional row to be added
@@ -65,12 +71,14 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		if self.new_account_window is None:
 			self.new_account_window = NewAccount()
 		self.new_account_window.show()
+		self.close()
 
 	def login_selection(self):
 		row = self.manager.currentRow()
 		account = self.manager.item(row, 0).text()
 
 		self.open_account_login_window(account)
+		self.close()
 
 	def delete_selection(self):
 		row = self.manager.currentRow()
@@ -87,6 +95,7 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 			self.delete_account_window = DeleteAccount(account)
 
 		self.delete_account_window.show()
+		self.close()
 
 	def open_account_login_window(self, account):
 		if self.account_login_window is None:
@@ -98,9 +107,8 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 
 		self.account_login_window.show()
 
-if __name__ == '__main__':
-	app = QtGui.QApplication(sys.argv)
-	gui = AccountViewer()
-	gui.populate_manager()
-	gui.show()
-	app.exec_()
+	def open_about_window(self):
+		if self.about_window is None:
+			self.about_window = AboutPage()
+
+		self.about_window.show()
