@@ -81,12 +81,29 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		self.close()
 
 	def delete_selection(self):
+		"""
+		Description:
+			When a user tries to delete an account
+			via right clicking on the cell, this function
+			is called.
+			Grabs the account name via the cell location
+			and calls the delete function.
+		"""
 		row = self.manager.currentRow()
 		account = self.manager.item(row, 0).text()
 
 		self.open_delete_account_window(account)
 
 	def open_delete_account_window(self, account):
+		"""
+		Arguments:
+			account - The account name of which the user would like
+			to delete
+		Description:
+			When a user attempts to delete a specific account,
+			this funciton is called. Determines if the window 
+			is opened, and if not, opens the window.
+		"""
 		if self.delete_account_window is None:
 			self.delete_account_window = DeleteAccount(account)
 		else:
@@ -98,6 +115,13 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		self.close()
 
 	def open_account_login_window(self, account):
+		"""
+		Description:
+			When a user attempts to login into a specific account,
+			this function is called and determines whether the window
+			has been opened or not. End goal is to open the window
+			as ordered.
+		"""
 		if self.account_login_window is None:
 			self.account_login_window = AccountLogin(account)
 		else:
@@ -108,6 +132,12 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		self.account_login_window.show()
 
 	def open_about_window(self):
+		"""
+		Description:
+			When called the funciton checks to see
+			if the about window has been opened, if not,
+			the window is opened.
+		"""
 		if self.about_window is None:
 			self.about_window = AboutPage()
 
