@@ -34,6 +34,12 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		self.manager.doubleClicked.connect(self.login_selection)
 
 	def context_menu_for_manager(self, event):
+		"""
+		Description:
+			Sets up the right click functionality for the
+			manager, allows user to login and delete an account
+			based on the row which was selected.
+		"""
 		self.menu = QtGui.QMenu(self)
 
 		# Login Selection
@@ -49,6 +55,12 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 		self.menu.popup(QtGui.QCursor.pos())
 
 	def populate_manager(self):
+		"""
+		Description:
+			When this function is called, parses the entire
+			Accounts table and populates the information
+			to the manager.
+		"""
 		row = 0
 		item = 0
 		limit = session.query(Accounts).count()
@@ -63,17 +75,38 @@ class AccountViewer(QtGui.QMainWindow, account_viewer_page):
 				self.manager.insertRow(row)
 
 	def set_manager_count(self, amount=0):
+		"""
+		Arguments:
+			amount - integer value, how many rows to display
+		Description:
+			Function which takes in the value amount x, and
+			sets the amount of rows within the table to x.
+		"""
 		# Always set the rowcount to zero first, otherwise first row acts weird
 		self.manager.setRowCount(0)
 		self.manager.setRowCount(amount)
 
 	def open_new_account_window(self):
+		"""
+		Description:
+			Function called when user wishes
+			to create a new account. Checks to see
+			if the window is already open, if not opens
+			the window and exits out of the calling
+			window.
+		"""
 		if self.new_account_window is None:
 			self.new_account_window = NewAccount()
 		self.new_account_window.show()
 		self.close()
 
 	def login_selection(self):
+		"""
+		Description:
+			Right click functionality to allow a user to login
+			into a specefic account. Grabs account name as text
+			and passes it into the open account window funciton.
+		"""
 		row = self.manager.currentRow()
 		account = self.manager.item(row, 0).text()
 
